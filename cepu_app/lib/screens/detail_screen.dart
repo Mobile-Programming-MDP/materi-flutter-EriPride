@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cepu_app/model/cepu.dart';
+import 'package:cepu_app/screens/map_detail.screen.dart';
 import 'package:cepu_app/services/cepu_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +11,6 @@ class DetailScreen extends StatelessWidget {
   final Post post;
 
   const DetailScreen({super.key, required this.post});
-
 
   Future<void> _deletePost(BuildContext context) async {
     final confirm = await showDialog<bool>(
@@ -30,15 +30,21 @@ class DetailScreen extends StatelessWidget {
         ],
       ),
     );
+
     if (confirm == true) {
       await PostService.deletePost(post);
-      if (context.mounted) Navigator.pop(context);
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
     }
   }
 
   void _sharePost() {
     final text =
-        '${post.category ?? ''}\n${post.description ?? ''}\nPosted by: ${post.fullname ?? ''}';
+        '${post.category ?? ''}\n'
+        '${post.description ?? ''}\n'
+        'Posted by: ${post.fullname ?? ''}';
+
     SharePlus.instance.share(ShareParams(text: text));
   }
 
@@ -47,10 +53,24 @@ class DetailScreen extends StatelessWidget {
     final currentUserId = FirebaseAuth.instance.currentUser?.uid;
     final isOwner = currentUserId != null && post.userId == currentUserId;
 
+    final hasLocation = post.latitude != null && post.longtitude != null;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(post.category ?? 'Post Detail'),
         actions: [
+          if (hasLocation)
+            IconButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => MapDetailScreen(post: post),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.location_on),
+              tooltip: 'View Location',
+            ),
           IconButton(
             onPressed: _sharePost,
             icon: const Icon(Icons.share),
@@ -75,7 +95,7 @@ class DetailScreen extends StatelessWidget {
                 width: double.infinity,
                 height: 250,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => const SizedBox(
+                errorBuilder: (_, __, ___) => const SizedBox(
                   height: 250,
                   child: Center(child: Icon(Icons.broken_image, size: 64)),
                 ),
@@ -85,8 +105,7 @@ class DetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (post.category != null)
-                    Chip(label: Text(post.category!)),
+                  if (post.category != null) Chip(label: Text(post.category!)),
                   const SizedBox(height: 8),
                   Text(
                     post.description ?? '',
@@ -103,7 +122,7 @@ class DetailScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (post.latitude != null && post.longtitude != null) ...[
+                  if (hasLocation) ...[
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -119,7 +138,6 @@ class DetailScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox
                   ],
                 ],
               ),
