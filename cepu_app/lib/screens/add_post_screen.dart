@@ -34,6 +34,7 @@ class _addPostScreenState extends State<addPostScreen> {
       'Lawan Arah',
       'Merokok di Jalan',
       'Tidak Pakai Helm',
+      'Lainnya',
     ];
   }
 
@@ -49,6 +50,7 @@ class _addPostScreenState extends State<addPostScreen> {
       );
       setState(() {
         _base64Image = base64Encode(compressedImage);
+        _generateDescriptionWithAI();
       });
     }
   }
@@ -190,7 +192,42 @@ class _addPostScreenState extends State<addPostScreen> {
       _isSubmitting = true;
     });
 
-    bool _isGenerating = false;
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    final fullName = FirebaseAuth.instance.currentUser?.displayName;
+    try {
+      if (_latitude == null || _longitude == null) {
+        await _getLocation();
+      }
+      PostService.addPost(
+        Post(
+          image: _base64Image,
+          description: _descriptionController.text,
+          category: _category,
+          latitude: _latitude,
+          longtitude: _longitude,
+          userId: userId,
+          fullname: fullName,
+        ),
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Posting berhasil disimpan!")));
+      Navigator.of(context).pop();
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Posting gagal disimpan! : $e")));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  bool _isGenerating = false;
 
     Future<void> _generateDescriptionWithAI() async {
       if (_base64Image == null) return;
@@ -262,41 +299,6 @@ class _addPostScreenState extends State<addPostScreen> {
         if (mounted) setState(() => _isGenerating = false);
       }
     }
-
-    final userId = FirebaseAuth.instance.currentUser?.uid;
-    final fullName = FirebaseAuth.instance.currentUser?.displayName;
-    try {
-      if (_latitude == null || _longitude == null) {
-        await _getLocation();
-      }
-      PostService.addPost(
-        Post(
-          image: _base64Image,
-          description: _descriptionController.text,
-          category: _category,
-          latitude: _latitude,
-          longtitude: _longitude,
-          userId: userId,
-          fullname: fullName,
-        ),
-      );
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Posting berhasil disimpan!")));
-      Navigator.of(context).pop();
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Posting gagal disimpan! : $e")));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSubmitting = false;
-        });
-      }
-    }
-  }
 
   @override
   void dispose() {
