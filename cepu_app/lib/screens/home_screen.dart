@@ -4,7 +4,6 @@ import 'package:cepu_app/services/cepu_service.dart';
 import 'package:cepu_app/widgets/post_list_item.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:cepu_app/model/cepu.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,7 +13,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  void initstate() {
+  @override
+  void initState() {
     super.initState();
     // testSetUser();
   }
@@ -54,18 +54,23 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Column(
         children: [
           const SizedBox(height: 8.0),
-          Image.network(
-            generateAvatarUrl(
-              FirebaseAuth.instance.currentUser?.displayName.toString(),
-            ),
-            width: 80,
-            height: 80,
-          ),
-          const SizedBox(height: 8.0),
-          Text(
-            FirebaseAuth.instance.currentUser!.displayName!,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          Builder(builder: (context) {
+            final displayName = FirebaseAuth.instance.currentUser?.displayName ?? 'Pengguna';
+            return Column(
+              children: [
+                Image.network(
+                  generateAvatarUrl(displayName),
+                  width: 80,
+                  height: 80,
+                ),
+                const SizedBox(height: 8.0),
+                Text(
+                  displayName,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            );
+          }),
           const SizedBox(height: 8.0),
           const Divider(),
           Expanded(
@@ -100,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const addPostScreen()),
+            MaterialPageRoute(builder: (context) => const AddPostScreen()),
           );
         },
         child: const Icon(Icons.add),

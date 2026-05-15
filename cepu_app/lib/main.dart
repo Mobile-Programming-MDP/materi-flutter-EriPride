@@ -1,9 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:http/http.dart' as http;
+import 'package:cepu_app/firebase_options.dart';
+import 'package:cepu_app/screens/home_screen.dart';
+import 'package:cepu_app/screens/sign_in_screen.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
@@ -158,9 +163,9 @@ class _MyAppState extends State<MyApp> {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            return const home_screen();
+            return const HomeScreen();
           } else {
-            return const sign_in.screen();
+            return const SignInScreen();
           }
         },
       ),
