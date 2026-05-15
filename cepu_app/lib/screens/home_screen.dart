@@ -4,6 +4,7 @@ import 'package:cepu_app/services/cepu_service.dart';
 import 'package:cepu_app/widgets/post_list_item.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cepu_app/model/cepu.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
